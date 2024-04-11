@@ -2,9 +2,8 @@
 from gql import gql, Client
 from gql.transport.httpx import HTTPXAsyncTransport
 
-import structlog
 import asyncio
-
+import structlog
 log = structlog.get_logger()
 
 transport = HTTPXAsyncTransport(
@@ -64,8 +63,32 @@ async def get_account(session, address):
         """
     )
     result = await session.execute(query, variable_values={'address': address })
+    return result.get('account')[0]
+
+async def create_account(session, account):
+    log.info('hasura.create_account', account=account)
+    query = gql(
+        """
+        mutation CreateAccount($address: String!, $crypto: String!, $metadata: JSON!, $network: String!) {
+            insert_account_one(object: {address: $address, crypto: $crypto, metadata: $metadata, network: $network}) {
+                address
+                crypto
+                id
+                metadata
+                network
+                uuid
+            }
+        }
+        """
+    )
+    result = await session.execute(query, variable_values=dict(
+        address=account.get('address'),
+        crypto=account.get('crypto'),
+        metadata=account.get('metadata'),
+        network=account.get('network'),
+    ))
     return result
-    
+
 # if __name__ == '__main__':
 #     async def main(address):
 #         await get_account(address)

@@ -1,10 +1,12 @@
-from litestar import Litestar, get, Request
-from litestar.plugins.structlog import StructlogPlugin
+from litestar import Litestar
+# from litestar.plugins.structlog import StructlogPlugin
+from litestar.logging import LoggingConfig
+from account import get_account, create_account
 
-from hasura import account
-
-@get("/account/{address:str}")
-async def get_account(address: str) -> dict:
-    return await account(address)
-
-app = Litestar([get_account], plugins=[StructlogPlugin()])
+app = Litestar([
+        get_account, create_account,
+        
+    ],
+    # plugins=[StructlogPlugin()])
+    logging_config=LoggingConfig(log_exceptions="always")
+)
