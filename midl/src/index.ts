@@ -1,4 +1,4 @@
-import { Elysia, t } from 'elysia'
+import { Elysia, mergeObjectArray, t } from 'elysia'
 import { Client, cacheExchange, fetchExchange, gql } from '@urql/core';
 
 const client = new Client({
@@ -54,14 +54,36 @@ const app = new Elysia()
 			params: t.Object({
 				address: t.String()
 			}),
-			// body: t.Object({
-			// 	address: t.String(),
-			// 	crypto: t.String(),
-			// 	network: t.String(),
-			// 	metadata: t.Unknown()
-			// })
 		})
-	.post('/account', async ({ body }) => body, {
+	.post('/account', async ({ body }) => {
+		console.log(body)
+		const CreateAccount = gql`
+			mutation CreateAccount($address: String!, $crypto: String!, $metadata: jsonb!, $network: String!) {
+				insert_account_one(object: {address: $address, crypto: $crypto, metadata: $metadata, network: $network}) {
+					address
+					crypto
+					id
+					metadata
+					network
+					uuid
+				}
+			}						
+		`;
+		console.log(CreateAccount)
+		const account = client
+		.mutation(CreateAccount, { 
+			address: body.address,
+			crypto: body.crypto,
+			metadata: body.metadata,
+			network: body.network
+		})
+		.toPromise()
+		.then((result) => {
+			console.log(result);
+			return result;
+		});
+		return account
+		},{
 		body: t.Object({
 			address: t.String(),
 			crypto: t.String(),

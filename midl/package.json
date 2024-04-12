@@ -7,11 +7,14 @@
   },
   "dependencies": {
     "@elysiajs/eden": "^1.0.11",
+    "@neondatabase/serverless": "^0.9.0",
     "@urql/core": "^5.0.0",
+    "drizzle-orm": "^0.30.8",
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "drizzle-kit": "^0.20.14"
   },
   "module": "src/index.js"
 }

@@ -3,13 +3,28 @@ import { edenFetch } from '@elysiajs/eden';
 import type { App } from './index';
 
 const tapp = edenFetch<App>('localhost:8080');
+var data = null
+// data = await tapp('/account/:address', {
+//     params: {
+//         address: '81meSJqk6SmbQmxdeHt1YEAKx7UrM8njQq1KyCTofeb1'
+//     }
+// })
+// console.log(data.data)
 
-const { data } = await tapp('/account/:address', {
-    params: {
-        address: '81meSJqk6SmbQmxdeHt1YEAKx7UrM8njQq1KyCTofeb1'
+data = await tapp('/account', {
+    method: 'POST',
+    // headers: {
+    //     'x-affiliation': 'Arius'
+    // },
+    // query: {}
+    body: {
+        address: '123',
+        crypto: 'SOL',
+        network: 'mainnet',
+        metadata: {}
     }
 })
-console.log(data)
+console.log(data.data)
 
 // const accountCreate = async () => {
 //     try {
