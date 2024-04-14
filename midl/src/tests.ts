@@ -1,15 +1,15 @@
 // client.ts
 import { edenFetch } from '@elysiajs/eden';
-import type { App } from './index';
+import type { App } from './account';
 
 const tapp = edenFetch<App>('localhost:8080');
 var data = null
-// data = await tapp('/account/:address', {
-//     params: {
-//         address: '81meSJqk6SmbQmxdeHt1YEAKx7UrM8njQq1KyCTofeb1'
-//     }
-// })
-// console.log(data.data)
+data = await tapp('/account/:address', {
+    params: {
+        address: '81meSJqk6SmbQmxdeHt1YEAKx7UrM8njQq1KyCTofeb1'
+    }
+})
+console.log(data.data)
 
 data = await tapp('/account', {
     method: 'POST',
@@ -18,7 +18,7 @@ data = await tapp('/account', {
     // },
     // query: {}
     body: {
-        address: '123',
+        address: '81meSJqk6SmbQmxdeHt1YEAKx7UrM8njQq1KyCTofeb1',
         crypto: 'SOL',
         network: 'mainnet',
         metadata: {}

@@ -1,5 +1,6 @@
 import { Elysia, mergeObjectArray, t } from 'elysia'
 import { Client, cacheExchange, fetchExchange, gql } from '@urql/core';
+import { Surreal } from 'surrealdb.js';
 
 const client = new Client({
   url: 'https://solschool.hasura.app/v1/graphql',
@@ -11,6 +12,9 @@ const client = new Client({
     };
   },
 });
+
+const db = new Surreal();
+
 const t1 = performance.now()
 
 const loggerPlugin = new Elysia()
@@ -26,61 +30,35 @@ const app = new Elysia()
 		}
 	})
 	.use(loggerPlugin)
+
+
+
+	// account
 	.get(
-		'/account/:address', 
-		({ params: { address } }) => {
-			const GetAccount = gql`
-				query GetAccount($address: String!) {
-					account(where: {address: {_eq: $address}}) {
-						address
-						crypto
-						id
-						metadata
-						network
-						uuid
-					}
-				}			  
-			`;
-			console.log(GetAccount)
-			const account = client
-			.query(GetAccount, { address: address })
-			.toPromise()
-			.then((result) => {
-			  console.log(result.data.account[0]);
-			  return result.data.account[0];
+		'/account/:address', async ({ params: { address } }) => {
+			await db.connect('http://127.0.0.1:8000/rpc', {
+				namespace: 'test',
+				database: 'test',
 			});
-			return account
+			return await db.select(`account:${address}`)
 		},{
 			params: t.Object({
 				address: t.String()
 			}),
-		})
+	})
+
+
 	.post('/account', async ({ body }) => {
-		console.log(body)
-		const CreateAccount = gql`
-			mutation CreateAccount($address: String!, $crypto: String!, $metadata: jsonb!, $network: String!) {
-				insert_account_one(object: {address: $address, crypto: $crypto, metadata: $metadata, network: $network}) {
-					address
-					crypto
-					id
-					metadata
-					network
-					uuid
-				}
-			}						
-		`;
-		console.log(CreateAccount)
-		const account = client
-		.mutation(CreateAccount, { 
+		await db.connect('http://127.0.0.1:8000/rpc', {
+			namespace: 'test',
+			database: 'test',
+		});
+		const account = await db.create('account', {
+			id: body.address, // PK
 			address: body.address,
 			crypto: body.crypto,
 			metadata: body.metadata,
-			network: body.network
-		})
-		.toPromise()
-		.then((result) => {
-			console.log(result);
-			return result;
+			network: body.network,
 		});
 		return account
 		},{
@@ -91,10 +69,12 @@ const app = new Elysia()
 			metadata: t.Unknown()
 		})
 	})
+
+
+
 	.onError(({ code, error, set }) => {
 		if (code === 'NOT_FOUND') {
 			set.status = 404
-
 			return 'Not Found :('
 		}
 	})
